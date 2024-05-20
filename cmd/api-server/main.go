@@ -17,4 +17,5 @@ func main() {
 	// Create client from gRPC server connection
 	client := client.NewTritonClient(conn)
 	client.Init()
+	client.SendInferenceRequest()
 }
