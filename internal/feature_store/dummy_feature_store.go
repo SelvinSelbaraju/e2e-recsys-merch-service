@@ -42,10 +42,11 @@ type DummyFeatureStore struct {
 	latencyMs     int32
 }
 
-func NewDummyFeatureStore(url string, connectTimeMs int32) *DummyFeatureStore {
+func NewDummyFeatureStore(url string, connectTimeMs int32, latencyMs int32) *DummyFeatureStore {
 	return &DummyFeatureStore{
 		url:           url,
 		connectTimeMs: connectTimeMs,
+		latencyMs:     latencyMs,
 	}
 }
 
