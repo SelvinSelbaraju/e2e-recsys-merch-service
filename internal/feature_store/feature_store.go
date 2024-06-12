@@ -6,7 +6,7 @@ import (
 
 type FeatureStore interface {
 	Connect()
-	GetFeatures(featureType FeatureType, id string) (interface{}, error)
+	GetFeatures(featureType FeatureType, ids []string) ([]interface{}, error)
 }
 
 type FeatureType string
@@ -17,15 +17,15 @@ const (
 )
 
 type UserFeatures struct {
-	clubMemberStatus string
-	age              int8
+	ClubMemberStatus string
+	Age              int8
 }
 
 type ProductFeatures struct {
-	productTypeName  string
-	productGroupName string
-	colourGroupName  string
-	departmentName   string
+	ProductTypeName  string
+	ProductGroupName string
+	ColourGroupName  string
+	DepartmentName   string
 }
 
 func CreateFeatureStore(featureStoreType string, url string) (FeatureStore, error) {

@@ -8,31 +8,31 @@ import (
 
 var dummyUserData = map[string]UserFeatures{
 	"1": {
-		age:              21,
-		clubMemberStatus: "ACTIVE",
+		Age:              21,
+		ClubMemberStatus: "ACTIVE",
 	},
 	"2": {
-		age:              33,
-		clubMemberStatus: "ACTIVE",
+		Age:              33,
+		ClubMemberStatus: "ACTIVE",
 	},
 	"3": {
-		age:              52,
-		clubMemberStatus: "ACTIVE",
+		Age:              52,
+		ClubMemberStatus: "ACTIVE",
 	},
 }
 
 var dummyProductData = map[string]ProductFeatures{
 	"1": {
-		productTypeName:  "Bra",
-		productGroupName: "Underwear",
-		colourGroupName:  "Black",
-		departmentName:   "Expressive Lingerie",
+		ProductTypeName:  "Bra",
+		ProductGroupName: "Underwear",
+		ColourGroupName:  "Black",
+		DepartmentName:   "Expressive Lingerie",
 	},
 	"2": {
-		productTypeName:  "Sweater",
-		productGroupName: "Garment Upper Body",
-		colourGroupName:  "Pink",
-		departmentName:   "Tops Knitwear DS",
+		ProductTypeName:  "Sweater",
+		ProductGroupName: "Garment Upper body",
+		ColourGroupName:  "Pink",
+		DepartmentName:   "Tops Knitwear DS",
 	},
 }
 
@@ -58,23 +58,27 @@ func (f *DummyFeatureStore) Connect() {
 	log.Printf("Connected to Dummy Feature Store in %v ms", duration)
 }
 
-func (f *DummyFeatureStore) GetFeatures(featureType FeatureType, id string) (interface{}, error) {
+func (f *DummyFeatureStore) GetFeatures(featureType FeatureType, ids []string) ([]interface{}, error) {
 	time.Sleep(time.Duration(f.latencyMs) * time.Millisecond)
-	if featureType == "user" {
-		features, exists := dummyUserData[id]
-		if exists {
-			return features, nil
+	var featureMaps []interface{}
+	for _, id := range ids {
+		if featureType == "user" {
+			features, exists := dummyUserData[id]
+			if exists {
+				featureMaps = append(featureMaps, features)
+			} else {
+				featureMaps = append(featureMaps, UserFeatures{})
+			}
+		} else if featureType == "product" {
+			features, exists := dummyProductData[id]
+			if exists {
+				featureMaps = append(featureMaps, features)
+			} else {
+				featureMaps = append(featureMaps, ProductFeatures{})
+			}
 		} else {
-			return UserFeatures{}, nil
+			return nil, fmt.Errorf("features must be one of user or product, got %v", featureType)
 		}
-	} else if featureType == "product" {
-		features, exists := dummyProductData[id]
-		if exists {
-			return features, nil
-		} else {
-			return ProductFeatures{}, nil
-		}
-	} else {
-		return nil, fmt.Errorf("features must be one of user or product, got %v", featureType)
 	}
+	return featureMaps, nil
 }
