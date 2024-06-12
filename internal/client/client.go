@@ -26,13 +26,12 @@ func (tritonClient TritonClient) SendServerReadyRequest() {
 	log.Printf("Triton Health - %v", serverReadyResponse)
 }
 
-func (tritonClient TritonClient) SendInferenceRequest() {
+func (tritonClient TritonClient) SendInferenceRequest(inferenceRequest *triton.ModelInferRequest) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	request := GetDummyInput()
-	log.Printf("Sending input: %v", request)
-	modelResponse, err := tritonClient.Client.ModelInfer(ctx, request)
+	log.Printf("Sending input: %v", inferenceRequest)
+	modelResponse, err := tritonClient.Client.ModelInfer(ctx, inferenceRequest)
 	if err != nil {
 		log.Fatalf("Received error: %v", err)
 	}

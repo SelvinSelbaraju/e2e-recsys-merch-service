@@ -55,7 +55,6 @@ func (dependencies *Dependencies) Init() {
 }
 
 func (dependencies *Dependencies) Handler(w http.ResponseWriter, r *http.Request) {
-	// dependencies.inferenceServer.SendInferenceRequest()
 	// Get the features
 	users, user_err := dependencies.featureStore.GetFeatures("user", []string{"1", "2"})
 	products, product_err := dependencies.featureStore.GetFeatures("product", []string{"1", "2"})
@@ -78,22 +77,45 @@ func (dependencies *Dependencies) Handler(w http.ResponseWriter, r *http.Request
 	json.Unmarshal([]byte(byteValue), &vocab)
 	parsedUserFeatures := ParseFeatures(users, vocab)
 	parsedProductFeatures := ParseFeatures(products, vocab)
-	fmt.Printf("User: %v, Product: %v", parsedUserFeatures, parsedProductFeatures)
-	bundledUsers := BundleFeatures(users)
-	bundledProducts := BundleFeatures(products)
-	fmt.Printf("users: %v, products: %v", bundledUsers, bundledProducts)
+	fmt.Printf("parsed users: %v, parsed products: %v", parsedUserFeatures, parsedProductFeatures)
+	bundledUsers := BundleFeatures(parsedUserFeatures)
+	bundledProducts := BundleFeatures(parsedProductFeatures)
+	fmt.Printf("bundled users: %v, bundled products: %v", bundledUsers, bundledProducts)
 	// // Send a request with these features to the inference server
+	request := triton.CreateInputInferRequest(bundledUsers, bundledProducts)
+	dependencies.inferenceServer.SendInferenceRequest(request)
+}
+
+func ConvertFloat32(value any) (float32, error) {
+	switch v := value.(type) {
+	case int:
+		return float32(v), nil
+	case int8:
+		return float32(v), nil
+	case int32:
+		return float32(v), nil
+	case int64:
+		return float32(v), nil
+	case float32:
+		return v, nil
+	case float64:
+		return float32(v), nil
+	default:
+		return 0, fmt.Errorf("unsupported type: %T", v)
+	}
 }
 
 // Bundle features into map[string][]any from []any
-func BundleFeatures(features []interface{}) map[string][]any {
-	typeVal := reflect.ValueOf(features[0])
-	result := make(map[string][]any)
-	for i := 0; i < typeVal.NumField(); i++ {
-		for _, bundle := range features {
-			fieldName := reflect.TypeOf(bundle).Field(i).Name
-			fieldValue := reflect.ValueOf(bundle).Field(i).Interface()
-			result[fieldName] = append(result[fieldName], fieldValue)
+func BundleFeatures(features []map[string]any) map[string][]float32 {
+	result := make(map[string][]float32)
+	for _, bundle := range features {
+		for k, v := range bundle {
+			parsedFieldValue, err := ConvertFloat32(v)
+			if err != nil {
+				log.Fatalf("conversion to float32 failed with error: %v", err)
+			} else {
+				result[k] = append(result[k], parsedFieldValue)
+			}
 		}
 	}
 	return result

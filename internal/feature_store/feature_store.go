@@ -26,6 +26,7 @@ type ProductFeatures struct {
 	ProductGroupName string
 	ColourGroupName  string
 	DepartmentName   string
+	Price            float32
 }
 
 func CreateFeatureStore(featureStoreType string, url string) (FeatureStore, error) {

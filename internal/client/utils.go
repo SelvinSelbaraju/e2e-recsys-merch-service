@@ -29,6 +29,35 @@ func GetDummyInput() *triton.ModelInferRequest {
 	}
 }
 
+func CreateInputTensor(featureName string, contents []float32) *triton.ModelInferRequest_InferInputTensor {
+	// Parse to int64 as expected by triton
+	contentLength := int64(len(contents))
+	shape := []int64{contentLength, 1}
+
+	return &triton.ModelInferRequest_InferInputTensor{
+		Name:     featureName,
+		Shape:    shape,
+		Datatype: "FP32",
+		Contents: &triton.InferTensorContents{
+			Fp32Contents: contents,
+		},
+	}
+}
+
+func CreateInputInferRequest(bundledUsers map[string][]float32, bundledProducts map[string][]float32) *triton.ModelInferRequest {
+	var inputs []*triton.ModelInferRequest_InferInputTensor
+	for k, v := range bundledUsers {
+		inputs = append(inputs, CreateInputTensor(k, v))
+	}
+	for k, v := range bundledProducts {
+		inputs = append(inputs, CreateInputTensor(k, v))
+	}
+	return &triton.ModelInferRequest{
+		ModelName: "mlp-model",
+		Inputs:    inputs,
+	}
+}
+
 func PostProcess(modelResponse *triton.ModelInferResponse) any {
 	rawOutputContents := modelResponse.GetRawOutputContents()
 	outputDatatype := modelResponse.Outputs[0].GetDatatype()

@@ -27,12 +27,14 @@ var dummyProductData = map[string]ProductFeatures{
 		ProductGroupName: "Underwear",
 		ColourGroupName:  "Black",
 		DepartmentName:   "Expressive Lingerie",
+		Price:            1.5,
 	},
 	"2": {
 		ProductTypeName:  "Sweater",
 		ProductGroupName: "Garment Upper body",
 		ColourGroupName:  "Pink",
 		DepartmentName:   "Tops Knitwear DS",
+		Price:            1.5,
 	},
 }
 
